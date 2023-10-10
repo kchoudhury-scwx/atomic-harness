@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 
 	types "github.com/secureworks/atomic-harness/pkg/types"
@@ -127,14 +128,16 @@ func CheckFileEvent(testRun *SingleTestRun, evt *types.SimpleEvent, nativeJsonSt
 		if IsGoArtWorkDirEvent(testRun, evt) {
 			return retval
 		}
-		if 0 == testRun.TimeWorkDirCreate || 0 != testRun.TimeWorkDirDelete {
-			if 0 != testRun.TimeWorkDirDelete && evt.Timestamp <= testRun.TimeWorkDirDelete {
-				// we want this
-			} else {
-				if gVerbose {
-					fmt.Println("Ignoring event before/after goartrun working dir event", nativeJsonStr)
+		if runtime.GOOS != "windows" {
+			if 0 == testRun.TimeWorkDirCreate || 0 != testRun.TimeWorkDirDelete {
+				if 0 != testRun.TimeWorkDirDelete && evt.Timestamp <= testRun.TimeWorkDirDelete {
+					// we want this
+				} else {
+					if gVerbose {
+						fmt.Println("Ignoring event before/after goartrun working dir event", nativeJsonStr)
+					}
+					return retval
 				}
-				return retval
 			}
 		}
 	}
